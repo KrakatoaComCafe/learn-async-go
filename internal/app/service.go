@@ -6,13 +6,26 @@ import (
 )
 
 type MessageService struct {
-	repo domain.MessageRepository
+	repo      domain.MessageRepository
+	publisher MessagePublisher
 }
 
-func NewMessageService(repo domain.MessageRepository) *MessageService {
+type MessagePublisher interface {
+	Publish(text string) error
+}
+
+func NewMessageService(repo domain.MessageRepository, publisher MessagePublisher) *MessageService {
 	return &MessageService{
-		repo: repo,
+		repo:      repo,
+		publisher: publisher,
 	}
+}
+
+func (s *MessageService) SendAndStoreMessage(text string) error {
+	if err := s.publisher.Publish(text); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *MessageService) SaveMessage(text string) error {

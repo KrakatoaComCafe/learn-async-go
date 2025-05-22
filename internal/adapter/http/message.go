@@ -33,7 +33,7 @@ func (h *MessageHandler) PostMessage(c *gin.Context) {
 		return
 	}
 
-	if err := h.svc.SaveMessage(input.Text); err != nil {
+	if err := h.svc.SendAndStoreMessage(input.Text); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error saving message"})
 		return
 	}
