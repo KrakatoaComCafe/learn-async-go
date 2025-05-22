@@ -39,5 +39,7 @@ func (p *KafkaProducer) Publish(text string) error {
 	if err != nil {
 		log.Printf("Error to publish: %+v", err)
 	}
+
+	log.Printf("[Kafka Producer] Published message %+v", msg.Value)
 	return err
 }

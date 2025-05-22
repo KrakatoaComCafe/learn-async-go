@@ -1,6 +1,7 @@
 package http
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -32,6 +33,7 @@ func (h *MessageHandler) PostMessage(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Text is obrigatory"})
 		return
 	}
+	log.Printf("[HTTP] New message received %+v", input.Text)
 
 	if err := h.svc.SendAndStoreMessage(input.Text); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error saving message"})

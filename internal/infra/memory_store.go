@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"log"
 	"sync"
 
 	"github.com/krakatoa/learn-async-go/internal/domain"
@@ -22,6 +23,7 @@ func (s *MemoryRepository) Save(message domain.Message) error {
 	defer s.mu.Unlock()
 
 	s.messages = append(s.messages, message)
+	log.Printf("[Repo] Message saved in memory %+v", message.Text)
 	return nil
 }
 

@@ -33,20 +33,25 @@ func NewKafkaConsumer(appLogic *app.MessageService) (*KafkaConsumer, error) {
 }
 
 func (c *KafkaConsumer) Start(ctx context.Context) {
-	handler := consumerGroupHandler{
-		svc: c.appLogic,
-	}
 	go func() {
 		for {
-			if err := c.group.Consume(ctx, []string{c.topic}, handler); err != nil {
-				log.Printf("Error consuming message %+v", err)
+			if ctx.Err() != nil {
+				log.Printf("[Kafka] Context canceled, stopping consumer")
+				return
 			}
 
-			if ctx.Err() != nil {
-				return
+			handler := consumerGroupHandler{
+				svc: c.appLogic,
+			}
+			if err := c.group.Consume(ctx, []string{c.topic}, handler); err != nil {
+				log.Printf("[Kafka] Error consuming message: %+v", err)
 			}
 		}
 	}()
+}
+func (c *KafkaConsumer) Close() error {
+	log.Println("[Kafka] Closing consumer group...")
+	return c.group.Close()
 }
 
 type consumerGroupHandler struct {
@@ -62,7 +67,7 @@ func (consumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error {
 func (h consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
 		text := string(msg.Value)
-		log.Printf("Message received from Kafka %s", text)
+		log.Printf("[Kafka Consumer] Message received %s", text)
 		h.svc.SaveMessage(text)
 		sess.MarkMessage(msg, "")
 	}
