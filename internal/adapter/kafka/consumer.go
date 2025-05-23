@@ -33,6 +33,9 @@ func NewKafkaConsumer(appLogic *app.MessageService) (*KafkaConsumer, error) {
 }
 
 func (c *KafkaConsumer) Start(ctx context.Context) {
+	handler := consumerGroupHandler{
+		svc: c.appLogic,
+	}
 	go func() {
 		for {
 			if ctx.Err() != nil {
@@ -40,9 +43,6 @@ func (c *KafkaConsumer) Start(ctx context.Context) {
 				return
 			}
 
-			handler := consumerGroupHandler{
-				svc: c.appLogic,
-			}
 			if err := c.group.Consume(ctx, []string{c.topic}, handler); err != nil {
 				log.Printf("[Kafka] Error consuming message: %+v", err)
 			}
