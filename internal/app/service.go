@@ -5,7 +5,13 @@ import (
 	"github.com/krakatoa/learn-async-go/internal/domain"
 )
 
-type MessageService struct {
+type MessageService interface {
+	SaveMessage(text string) error
+	SendAndStoreMessage(text string) error
+	GetMessages() []domain.Message
+}
+
+type messageService struct {
 	repo      domain.MessageRepository
 	publisher MessagePublisher
 }
@@ -14,21 +20,21 @@ type MessagePublisher interface {
 	Publish(text string) error
 }
 
-func NewMessageService(repo domain.MessageRepository, publisher MessagePublisher) *MessageService {
-	return &MessageService{
+func NewMessageService(repo domain.MessageRepository, publisher MessagePublisher) MessageService {
+	return &messageService{
 		repo:      repo,
 		publisher: publisher,
 	}
 }
 
-func (s *MessageService) SendAndStoreMessage(text string) error {
+func (s *messageService) SendAndStoreMessage(text string) error {
 	if err := s.publisher.Publish(text); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *MessageService) SaveMessage(text string) error {
+func (s *messageService) SaveMessage(text string) error {
 	msg := domain.Message{
 		ID:   uuid.NewString(),
 		Text: text,
@@ -36,6 +42,6 @@ func (s *MessageService) SaveMessage(text string) error {
 	return s.repo.Save(msg)
 }
 
-func (s *MessageService) GetMessages() []domain.Message {
+func (s *messageService) GetMessages() []domain.Message {
 	return s.repo.GetAll()
 }

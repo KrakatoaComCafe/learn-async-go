@@ -11,10 +11,10 @@ import (
 type KafkaConsumer struct {
 	group    sarama.ConsumerGroup
 	topic    string
-	appLogic *app.MessageService
+	appLogic app.MessageService
 }
 
-func NewKafkaConsumer(appLogic *app.MessageService) (*KafkaConsumer, error) {
+func NewKafkaConsumer(appLogic app.MessageService) (*KafkaConsumer, error) {
 	config := sarama.NewConfig()
 	config.Version = sarama.V2_1_0_0
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
@@ -55,7 +55,7 @@ func (c *KafkaConsumer) Close() error {
 }
 
 type consumerGroupHandler struct {
-	svc *app.MessageService
+	svc app.MessageService
 }
 
 func (consumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error {

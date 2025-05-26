@@ -9,10 +9,10 @@ import (
 )
 
 type MessageHandler struct {
-	svc *app.MessageService
+	svc app.MessageService
 }
 
-func NewMessageHandler(svc *app.MessageService) *MessageHandler {
+func NewMessageHandler(svc app.MessageService) *MessageHandler {
 	return &MessageHandler{
 		svc: svc,
 	}
