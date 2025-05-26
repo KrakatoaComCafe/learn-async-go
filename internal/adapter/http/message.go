@@ -36,6 +36,7 @@ func (h *MessageHandler) PostMessage(c *gin.Context) {
 	log.Printf("[HTTP] New message received %+v", input.Text)
 
 	if err := h.svc.SendAndStoreMessage(input.Text); err != nil {
+		log.Printf("[HTTP] Falha ao publicar mensagem '%s': %v", input.Text, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error saving message"})
 		return
 	}

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/krakatoa/learn-async-go/internal/adapter/http"
 	"github.com/krakatoa/learn-async-go/internal/adapter/kafka"
 	"github.com/krakatoa/learn-async-go/internal/app"
@@ -12,9 +14,8 @@ func main() {
 	app := fx.New(
 		fx.Provide(
 			kafka.NewKafkaConsumer,
-			kafka.NewKafkaProducer,
+			newKafkaProducer,
 			infra.NewMemoryRepository,
-			newMessagePublisher,
 			app.NewMessageService,
 			http.NewMessageHandler,
 			http.NewRouter,
@@ -27,6 +28,10 @@ func main() {
 	app.Run()
 }
 
-func newMessagePublisher(p *kafka.KafkaProducer) app.MessagePublisher {
-	return p
+func newKafkaProducer() app.MessagePublisher {
+	producer, err := kafka.NewKafkaProducer()
+	if err != nil {
+		log.Printf("Error creating producer %+v", err)
+	}
+	return producer
 }

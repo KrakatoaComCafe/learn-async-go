@@ -1,6 +1,7 @@
 package kafka
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/IBM/sarama"
@@ -30,6 +31,8 @@ func NewKafkaProducer() (*KafkaProducer, error) {
 }
 
 func (p *KafkaProducer) Publish(text string) error {
+	log.Printf("[Kafka Producer] Publicando mensagem: %s", text)
+
 	msg := &sarama.ProducerMessage{
 		Topic: p.topic,
 		Value: sarama.StringEncoder(text),
@@ -37,9 +40,10 @@ func (p *KafkaProducer) Publish(text string) error {
 
 	_, _, err := p.producer.SendMessage(msg)
 	if err != nil {
-		log.Printf("Error to publish: %+v", err)
+		log.Printf("[Kafka Producer] Error to publish message %s: %v", p.topic, err)
+		return fmt.Errorf("error to publish message into Kafka: %w", err)
 	}
 
 	log.Printf("[Kafka Producer] Published message %+v", msg.Value)
-	return err
+	return nil
 }

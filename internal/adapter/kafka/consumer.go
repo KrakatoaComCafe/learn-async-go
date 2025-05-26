@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/IBM/sarama"
@@ -68,7 +69,13 @@ func (h consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, cla
 	for msg := range claim.Messages() {
 		text := string(msg.Value)
 		log.Printf("[Kafka Consumer] Message received %s", text)
-		h.svc.SaveMessage(text)
+
+		if err := h.svc.SaveMessage(text); err != nil {
+			log.Println(fmt.Errorf("[Kafka Consumer] Error to save message [%s: %w]", text, err))
+			continue
+		}
+
+		log.Printf("[Kafka Consumer] Message save")
 		sess.MarkMessage(msg, "")
 	}
 	return nil
