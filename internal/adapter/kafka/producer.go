@@ -3,6 +3,7 @@ package kafka
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/IBM/sarama"
 )
@@ -18,7 +19,7 @@ func NewKafkaProducer() (*KafkaProducer, error) {
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Producer.Retry.Max = 5
 
-	brokers := []string{"localhost:9092"}
+	brokers := []string{os.Getenv("KAFKA_BROKER")}
 	producer, err := sarama.NewSyncProducer(brokers, config)
 	if err != nil {
 		return nil, err

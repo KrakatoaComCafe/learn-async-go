@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/IBM/sarama"
 	"github.com/krakatoa/learn-async-go/internal/app"
@@ -20,7 +21,7 @@ func NewKafkaConsumer(appLogic app.MessageService) (*KafkaConsumer, error) {
 	config.Version = sarama.V2_1_0_0
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 
-	brokers := []string{"localhost:9092"}
+	brokers := []string{os.Getenv("KAFKA_BROKER")}
 	group, err := sarama.NewConsumerGroup(brokers, "my-group", config)
 	if err != nil {
 		return nil, err
