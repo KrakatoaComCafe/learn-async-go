@@ -18,6 +18,14 @@ jobs:
             -   name: Checkout
                 uses: actions/checkout@v4
 
+            -   name: Set up Go
+                uses: actions/setup-go@v4
+                with:
+                    go-version: '1.24.3'
+
+            -   name: Run tests
+                run: go test ./... -v
+
             -   name: Set lowercase actor
                 id: vars
                 run: echo "actor_lower=$(echo '${{ github.actor }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
