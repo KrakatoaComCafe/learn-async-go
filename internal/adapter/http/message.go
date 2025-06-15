@@ -5,7 +5,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/krakatoa/learn-async-go/internal/adapter/http/middleware"
 	"github.com/krakatoa/learn-async-go/internal/app"
+	"github.com/krakatoa/learn-async-go/internal/domain/auth"
 )
 
 type MessageHandler struct {
@@ -18,9 +20,12 @@ func NewMessageHandler(svc app.MessageService) *MessageHandler {
 	}
 }
 
-func (h *MessageHandler) RegisterRoutes(r *gin.Engine) {
-	r.POST("/messages", h.PostMessage)
-	r.GET("/messages", h.GetMessages)
+func (h *MessageHandler) RegisterRoutes(r *gin.Engine, authMiddleware *middleware.AuthMiddleware) {
+	protected := r.Group("/messages")
+	protected.Use(authMiddleware.Handle())
+
+	protected.POST("/", h.PostMessage)
+	protected.GET("/", h.GetMessages)
 }
 
 type messageInput struct {
@@ -33,7 +38,11 @@ func (h *MessageHandler) PostMessage(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Text is obrigatory"})
 		return
 	}
-	log.Printf("[HTTP] New message received %+v", input.Text)
+
+	claims := c.MustGet("claims").(*auth.UserClaims)
+	email := claims.Email
+
+	log.Printf("[HTTP] User [%s] New message received %+v", email, input.Text)
 
 	if err := h.svc.SendAndStoreMessage(input.Text); err != nil {
 		log.Printf("[HTTP] Falha ao publicar mensagem '%s': %v", input.Text, err)
